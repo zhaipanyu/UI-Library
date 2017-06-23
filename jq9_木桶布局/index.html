@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>手写木桶布局</title>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.js"></script>
+</head>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .ct {
+        width: 1200px;
+        /*容器宽度*/
+        margin: 0 auto;
+    }
+
+    img {
+        margin-top: 10px;
+    }
+</style>
+
+<body>
+    <div class="ct">
+
+    </div>
+    <script>
+        /*  
+- 拿到图片-根据随机数和网址  :遍历
+- 创建图片对象存入数组里-布局  :遍历.onload.new Image()
+- 计算:当图片所有宽度之和大于屏宽,pop(),再渲染到html,保存最后一个元素的宽度:if
+- 新数组拿到上次数组最后一个作为第一个,push数组最后一个 :遍历
+- 放入下一行的数组,并设置图片新的宽度,等比缩放设置新的高度
+如:
+    新图宽(屏宽)         图片旧宽
+   ——————————    =     ————————      ===>  新图高度X = (ctWidth *200) / 图片旧宽  
+    新图高度X  	         旧高(200)
+
+ :图片旧宽=数组pop后的图片宽度和
+*/
+
+
+
+        function layoutImg($ct, num) {
+            var $ct = $ct;
+            var number = num;
+            var imgArr = [];
+            var imgWidth = 0;
+            createImg(number);
+
+            function createImg(number) {
+                var imgsrcArr = getImagesrc(number);
+                for (var i = 0; i < number; i++) {
+                    !function () {
+                        var img = new Image();
+                        img.src = imgsrcArr[i];
+                        img.onload = function () {//保存属性
+                            var imgMessage = {
+                                height: 200,
+                                img: img,
+                                width: (200 * img.width) / img.height
+                            }
+                            addArray(imgMessage);
+                        }
+                    }();
+                }
+            }//createImg
+
+
+            function addArray(imgMessage) {
+                imgArr.push(imgMessage.img);
+                imgWidth += imgMessage.width;
+                // console.log('0');
+                // console.log(imgWidth);
+                // console.log($ct.width());
+                if (imgWidth > $ct.width()) {
+                    // console.log('1');
+                    imgWidth -= imgMessage.width;
+                    imgArr.pop();
+                    //buju
+                    display();
+
+                    imgArr = [];
+                    imgArr.push(imgMessage.img);
+                    imgWidth = imgMessage.width;
+                }
+            }
+
+            function display() {
+                var $html = $('<div class = "line"></div>');
+                for (var i = 0; i < imgArr.length; i++) {
+                    $(imgArr[i]).height(200 * ($ct.width() / imgWidth));
+                    $html.append($(imgArr[i]));
+                }
+                $ct.append($html);
+            }
+
+
+            //拿到图片
+            function getImagesrc(num) {//num为图片数
+                var imgArr = [];
+                for (var i = 0; i < num; i++) {
+                    imgArr[i] = 'https://unsplash.it/' + parseInt(Math.random() * 100 + 200) + '/' + parseInt(Math.random() * 100 + 200)
+                }
+                return imgArr;
+            }
+
+        }
+        layoutImg($('.ct'), 50);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>模拟后台数据,加载更多数据</title>
+    
+    <style>
+        ul,
+        li{
+           padding: 0;
+           margin: 0; 
+        }
+        .data-ct li{
+            padding: 5px ;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top:20px;
+
+        }
+        .btn{
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: inline-block;
+            border: 1px solid red;
+            border-radius: 4px;
+            padding: 5px;
+            margin-top: 20px;
+            color: red;
+            text-align: center;
+        }
+        a{
+            text-decoration: none;
+        }
+        
+    </style>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+    <ul class="data-ct">
+        <li>数据1</li>
+        <li>数据2</li>
+        <li>数据3</li>
+    </ul>
+    <a class = 'btn' href="#">加载更多</a>
+
+    <script>//ajax单独分离
+    var len = 3;
+    var pageIndex = 1;
+        $('.btn').on('click',function(){
+            $.ajax({
+                url:'/getInfo',
+                type:'get',
+                data:{
+                    length:len,
+                    pageIndex:pageIndex
+                },
+                dataType:'json'
+            }).done(function(res){
+                pageIndex++;
+                var data = res.data;
+                getData(data);
+            }).fail(function(){
+                alert('ajax-fail');
+            })
+        }) 
+
+//{新闻1.新闻2,新闻3}
+
+        function getData(data){
+            var html = '';
+            $.each(data,function(idx,data){ 
+                html += '<li>' + data + '</li>' 
+            })
+            
+        //法2
+        //     for(var i=0;i<data.length;i++){
+        //     html += '<li>' + data[i] + '</li>' //遍历news数组，生成news[0],news[1],news[2]
+        // }
+
+            $('.data-ct').append(html);
+            console.log(html);
+        }
+    </script>
+</body>
+</html>

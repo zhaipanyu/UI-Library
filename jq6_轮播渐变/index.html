@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>手写渐变轮播</title>
+    <style>
+        .clearfix::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
+        ul,
+        li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .carousel {
+            position: relative;
+            width: 300px;
+            height: 430px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .carousel>.img-ct {
+            position: absolute;
+            width: 1200px;
+        }
+
+        .carousel>.img-ct>li {
+            float: left;
+            width: 300px;
+            height: 430px;
+        }
+
+        .carousel>.img-ct>li img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .carousel .btn {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            font-size: 1.25rem;
+            color: #fff;
+            border-radius: 50%;
+            background: #666;
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
+        .btn-pre {
+            left: 10px;
+            top: 50%;
+        }
+
+        .btn-next {
+            right: 10px;
+            top: 50%;
+        }
+
+        .carousel .bullet {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .carousel .bullet>li {
+            display: inline-block;
+            width: 30px;
+            height: 8px;
+            border: 1px solid #fff;
+            border-radius: 4px;
+            background: #666;
+            margin: 0 2px;
+        }
+
+        .carousel .bullet .active {
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="carousel">
+        <ul class="img-ct clearfix">
+            <li>我是第一张<a href="#"><img src="http://cdn.jirengu.com/book.jirengu.com/img/13.jpg"></a></li>
+            <li>我是第二张<a href="#"><img src="http://cdn.jirengu.com/book.jirengu.com/img/14.jpg"></a></li>
+            <li>我是第三张<a href="#"><img src="http://cdn.jirengu.com/book.jirengu.com/img/15.jpg"></a></li>
+            <li>我是第四张<a href="#"><img src="http://cdn.jirengu.com/book.jirengu.com/img/16.jpg"></a></li>
+        </ul>
+        <a class="btn btn-pre">&lt</a>
+        <a class="btn btn-next">&gt</a>
+        <ul class="bullet">
+            <li class="active"></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        var $imgCt = $(".img-ct"),
+            $btnPre = $(".btn-pre"),
+            $btnNext = $(".btn-next"),
+            $bullet = $(".bullet"),
+            $imgItem = $imgCt.children('li'),
+            isAnimal = true,
+            clock;//全局变量保存定时器
+        var $firstLi = $imgCt.children('li').first().clone();
+        var $lastLi = $imgCt.children('li').last().clone();
+        var imgWidth = $imgCt.children('li').width();//拿到300
+        //.css(width) 和 .width()之间的区别是后者返回一个没有单位的数值（例如，400），前者是返回带有完整单位的字符串（例如，400px
+        var imgCount = $imgCt.children('li').length;//4
+        $imgCt.append($firstLi);//首部加最后一张
+        $imgCt.prepend($lastLi);//尾部加第一张//此时有6张图片
+        //重设$imgCt宽度//1800才对
+        $imgCt.width(imgWidth * (2 + imgCount));//1800px
+        //改变图片初始位置
+        $imgCt.css({ left: -imgWidth });//不写这句初始显示排在第一的第四张图片,写了显示第2张
+
+        //启动定时器
+        auto();
+        //点击上一张事件
+        $btnPre.on('click', function (e) {
+            clearInterval(clock);//清楚定时器
+            //判断锁
+            if (isAnimal === false) { return };
+            isAnimal = false;
+            btnPre();
+        })
+
+        //封装上一张
+        function btnPre() {
+            //拿到容器的left值
+            var imgCtLeft = $imgCt.css('left');
+            $imgCt.fadeOut(500, function () {
+                //淡出的时候移动容器
+                $imgCt.css({ left: '+=' + imgWidth })
+
+                $imgCt.fadeIn(500, function () {
+                    var idx = Math.abs(parseInt(imgCtLeft) / parseInt(imgWidth))//根据位移拿索引
+                    bullet(idx - 2);//算好了远点
+                    //偏移完毕开锁
+                    isAnimal = true;
+                    if (parseInt(imgCtLeft) === -imgWidth) {//初始位置点击上一张时
+                        // console.log('满足条件');
+                        //迅速切换到第四张图
+                        $imgCt.css({ left: -imgWidth * imgCount })
+                        bullet(3);
+                    }
+                })//fadeIn
+
+            })//fadeOut
+            //在fadeOut里放入fadeIn.
+        }
+
+        //点击显示下一张
+        $btnNext.on('click', function () {
+            clearInterval(clock);//清楚定时器
+            //判断锁
+            if (isAnimal === false) { return };
+            isAnimal = false;
+            btnNext();
+        })
+        //封装下一张
+        function btnNext() {
+            var imgCtLeft = $imgCt.css('left');//带px
+            // console.log('imgCtLeft:'+imgCtLeft);
+
+            //淡出
+            $imgCt.fadeOut(500, function () {
+                $imgCt.css({ left: '-=' + imgWidth })
+                //淡入
+                $imgCt.fadeIn(500, function () {
+                    var idx = Math.abs(parseInt(imgCtLeft) / parseInt(imgWidth));
+                    bullet(idx);
+                    isAnimal = true;
+                    if (parseInt(imgCtLeft) === -imgWidth * imgCount) {//在第5张时点击显示第六张时
+                        // 不加锁会出现连续点击left偏大而白屏
+                        //迅速右移到第二张
+                        $imgCt.css({ left: -imgWidth })
+                        bullet(0);
+
+                    }
+                })//fadeIn结束
+
+            })//fadeOut结束
+        }
+
+        //点击小圆点切换图片
+        $bullet.children('li').on('click', function () {
+            clearInterval(clock);//清楚定时器
+            //取点击bullet的li索引
+            var idx = $(this).index();//0-3
+            // console.log('idx:'+idx);
+            $imgCt.animate({ left: -imgWidth * (idx + 1) }, 500, function () {
+                bullet(idx);//0-3
+            })
+        })
+
+        //bullet随图片变灰
+        function bullet(idx) {
+            $bullet.children('li').siblings().removeClass('active');
+            $bullet.children('li').eq(idx).addClass('active');
+        }
+
+
+        //清楚定时
+        $imgCt.on('mouseenter', function () {
+            clearInterval(clock);
+        })
+        $imgCt.on('mouseleave', function () {
+            auto();
+        })
+        //定时器
+        function auto() {
+            clock = setInterval(function () {
+                if (isAnimal === false) { return };
+                isAnimal = false;
+                btnNext();
+            }, 2000)
+        }
+    </script>
+
+</body>
+
+</html>

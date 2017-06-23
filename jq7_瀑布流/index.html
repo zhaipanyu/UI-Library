@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>瀑布流</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .ct {
+            position: relative;
+        }
+
+        .item {
+            margin-right: 10px;
+            margin-top: 10px;
+            width: 200px;
+            position: absolute;
+            transition: all 1s;
+        }
+
+        .h1 {
+            height: 200px;
+            background: pink;
+        }
+
+        .h2 {
+            height: 250px;
+            background: #ccc;
+        }
+
+        .h3 {
+            height: 300px;
+            background: goldenrod;
+        }
+
+        .h4 {
+            height: 400px;
+            background: aquamarine;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ct">
+        <div class="item h1">1</div>
+        <div class="item h2">2</div>
+        <div class="item h3">3</div>
+        <div class="item h4">4</div>
+        <div class="item h1">1</div>
+        <div class="item h2">2</div>
+        <div class="item h3">3</div>
+        <div class="item h4">4</div>
+        <div class="item h1">1</div>
+        <div class="item h2">2</div>
+        <div class="item h3">3</div>
+        <div class="item h4">4</div>
+        <div class="item h1">1</div>
+        <div class="item h2">2</div>
+        <div class="item h3">3</div>
+        <div class="item h4">4</div>
+    </div>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        pubu();
+        $(window).on('resize', function () {//屏幕拉伸时
+            pubu();
+        })
+
+        function pubu() {
+            //创建6个数组.即列数
+            var counts = parseInt($('.ct').width() / $('.item').outerWidth(true));//可能是6
+            //数组遍历赋值
+            var itemArray = [];
+            for (var i = 0; i < counts; i++) {
+                itemArray[i] = 0;
+            }
+            //遍历.item:取数组里值最小值
+            $('.item').each(function () {
+                var minValue = Math.min.apply(null, itemArray)
+                //取数组里值最小值对应索引.
+                var minIdx = itemArray.indexOf(minValue);//拿到所在的第几列idx,用来计算left.
+                //css赋值
+                $(this).css({
+                    left: $(this).outerWidth(true) * minIdx,
+                    top: minValue//第91行保存的6组数据的最小值作为当前top值.
+                    // top: itemArray[minIdx]
+                })
+                //高度赋值给itemArray[]
+                itemArray[minIdx] += $(this).outerHeight(true);//重点是+=,高度累加
+                //关键:保留高度,把高度值放入数组里.下次排列再拿出来比较高度,取最高度最小的作为放置点.
+            })
+
+        }
+    </script>
+</body>
+
+</html>
